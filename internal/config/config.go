@@ -35,5 +35,9 @@ func LoadConfig() *Config {
 }
 
 func getEnv(key, fallback string) string {
-	if value, exists := os.LookupEnv()
+	if value, exists := os.LookupEnv(key); exists && value != "" {
+		return value
+	}
+
+	return fallback
 }
