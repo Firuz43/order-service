@@ -27,7 +27,7 @@ func LoadConfig() *Config {
 		DBHost:     getEnv("DB_HOST", "localhost"),
 		DBPort:     getEnv("DB_PORT", "5432"),
 		DBUser:     getEnv("DB_USER", "user"),
-		DBPassword: getEnv("DB_PASSWORD", "password"),
+		DBPassword: getEnv("DB_PASSWORD", "asswe"),
 		DBName:     getEnv("DB_NAME", "go_backend"),
 		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
 		ServerPort: getEnv("PORT", "8000"),
