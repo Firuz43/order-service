@@ -13,18 +13,55 @@ type postgresOrderRepository struct {
 	db *pgxpool.Pool
 }
 
-// Delete implements [OrderRepository].
-func (r *postgresOrderRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	panic("unimplemented")
-}
-
 // NewPostgresOrderRepository is a constructor returning the interface
 func NewPostgresOrderRepository(db *pgxpool.Pool) OrderRepository {
 	return &postgresOrderRepository{db: db}
 }
 
 func (r *postgresOrderRepository) Update(ctx context.Context, order *models.Order) error {
-	query := `UPDATE orders SET `
+	//Updating multiple columns
+	query := `
+		UPDATE orders
+		SET customer_name = $1,
+			item = $2,
+			quantity = $3,
+			price = $4,
+			status = $5,
+			created_at $6,
+			updated_at $7,
+		WHERE id = $8
+	`
+
+	// Exec the update
+	result, err := r.db.Exec(ctx, query,
+		order.CustomerName, //$1
+		order.Item,
+		order.Quantity,
+		order.Price,
+		order.Status,
+		order.CreatedAt,
+		order.UpdatedAt,
+		order.ID,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to update order: %w", err)
+	}
+
+	// Check if any rows were actually updated
+	rowsAfected := result.RowsAffected()
+	if rowsAfected == 0 {
+		return fmt.Errorf("order with ID %s not found", order.ID)
+	}
+
+	return nil
+
+	/*
+		UPDATE with SET clause changes columns
+		WHERE id = $7 = target which row to update
+		RowsAffected() = how many rows were changed
+		If 0 rows affected, the order didn't exist
+	*/
 }
 
 func (r *postgresOrderRepository) List(ctx context.Context, limit, offset int) ([]*models.Order, error) {
