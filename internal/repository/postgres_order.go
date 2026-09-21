@@ -18,23 +18,68 @@ func (r *postgresOrderRepository) Delete(ctx context.Context, id uuid.UUID) erro
 	panic("unimplemented")
 }
 
-// List implements [OrderRepository].
-func (r *postgresOrderRepository) List(ctx context.Context, limit int, offset int) ([]*models.Order, error) {
-	panic("unimplemented")
-}
-
-// Update implements [OrderRepository].
-func (r *postgresOrderRepository) Update(ctx context.Context, order *models.Order) error {
-	panic("unimplemented")
-}
-
 // NewPostgresOrderRepository is a constructor returning the interface
 func NewPostgresOrderRepository(db *pgxpool.Pool) OrderRepository {
 	return &postgresOrderRepository{db: db}
 }
 
+func (r *postgresOrderRepository) Update(ctx context.Context, order *models.Order) error {
+	query := `UPDATE orders SET `
+}
+
+func (r *postgresOrderRepository) List(ctx context.Context, limit, offset int) ([]*models.Order, error) {
+	if limit <= 0 {
+		limit = 10
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	query :=
+
+		`SELECT id, customer_name, item, quantity, price, status, created_at, updated_at 
+		 FROM orders
+		 ORDER BY created_at DESC
+		 LIMIT $1 OFFSET $2
+		`
+
+	rows, err := r.db.Query(ctx, query, limit, offset)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to list orders: %w", err)
+	}
+	defer rows.Close()
+
+	orders := make([]*models.Order, 0, limit)
+
+	for rows.Next() {
+		order := &models.Order{}
+
+		err := rows.Scan(
+			&order.ID,
+			&order.CustomerName,
+			&order.Item,
+			&order.Quantity,
+			&order.Price,
+			&order.Status,
+			&order.CreatedAt,
+			&order.UpdatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan order row: %w", err)
+		}
+
+		orders = append(orders, order)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error while literating orders: %w", err)
+	}
+	return orders, nil
+}
+
+// GetByID implements [OrderRepository].
 func (r *postgresOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*models.Order, error) {
-	query := `SELECT id, customer_name, item, quantity, price, status, created_at, updated_at FROM ordersWHERE id = $1`
+	query := `SELECT id, customer_name, item, quantity, price, status, created_at, updated_at FROM orders WHERE id = $1`
 
 	row := r.db.QueryRow(ctx, query, id)
 
@@ -57,6 +102,7 @@ func (r *postgresOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*m
 	return &order, nil
 }
 
+// CREATE implements [OrderRepository].
 func (r *postgresOrderRepository) Create(ctx context.Context, order *models.Order) error {
 	query := `INSERT INTO orders (id, customer_name, item, quantity, price, status, created_at, updated_at) VALUES 
 	($1, $2, $3, $4, $5, $6, $7, $8)`
