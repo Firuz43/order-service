@@ -6,6 +6,7 @@ import (
 	"uuid"
 
 	"github.com/Firuz43/order-service/internal/models"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -18,6 +19,26 @@ func NewPostgresOrderRepository(db *pgxpool.Pool) OrderRepository {
 	return &postgresOrderRepository{db: db}
 }
 
+func (r *postgresOrderRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	// DELETE query
+	query := `DELETE FROM orders WHERE id = $1`
+
+	// Exec the delete
+	result, err := r.db.Exec(ctx, query, id)
+
+	if err != nil {
+		return fmt.Errorf("failed to delete order: %w", err)
+	}
+
+	// Check if order existed
+	rowsAffected := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf("order with ID %s not found", id)
+	}
+
+	return nil
+}
+
 func (r *postgresOrderRepository) Update(ctx context.Context, order *models.Order) error {
 	//Updating multiple columns
 	query := `
@@ -27,8 +48,8 @@ func (r *postgresOrderRepository) Update(ctx context.Context, order *models.Orde
 			quantity = $3,
 			price = $4,
 			status = $5,
-			created_at $6,
-			updated_at $7,
+			created_at = $6,
+			updated_at = $7
 		WHERE id = $8
 	`
 
@@ -132,6 +153,9 @@ func (r *postgresOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*m
 		&order.UpdatedAt,
 	)
 
+	if erros.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("order with ID %s not found", id)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order by ID %w", err)
 	}
