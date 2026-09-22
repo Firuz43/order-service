@@ -10,8 +10,8 @@ import (
 	"github.com/Firuz43/order-service/internal/handlers"
 	"github.com/Firuz43/order-service/internal/repository"
 	"github.com/Firuz43/order-service/internal/service"
-	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {

@@ -55,13 +55,13 @@ func (r *postgresOrderRepository) Update(ctx context.Context, order *models.Orde
 	// Exec the update
 	result, err := r.db.Exec(ctx, query,
 		order.CustomerName, //$1
-		order.Item,
-		order.Quantity,
-		order.Price,
-		order.Status,
-		order.CreatedAt,
-		order.UpdatedAt,
-		order.ID,
+		order.Item,         //$2
+		order.Quantity,     //$3
+		order.Price,        //$4
+		order.Status,       //$5
+		order.CreatedAt,    //$6
+		order.UpdatedAt,    //$7
+		order.ID,           //$8
 	)
 
 	if err != nil {

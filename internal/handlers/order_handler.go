@@ -80,7 +80,7 @@ func (h *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, order)
 }
 
-// GET /orders?
+// GET /orders?limit10&offset=0
 func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 	limitStr := r.URL.Query().Get("limit")
 	offsetStr := r.URL.Query().Get("offset")
