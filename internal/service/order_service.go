@@ -46,5 +46,28 @@ func (s *orderService) CreateOrder(ctx context.Context, req *models.CreateOrderR
 	order := &models.Order{
 		ID:           uuid.New(),
 		CustomerName: req.CustomerName,
+		Item:         req.Item,
+		Quantity:     req.Quantity,
+		Price:        req.Price,
+		Status:       models.StatusPending,
+		CreatedAt:    now,
+		UpdatedAt:    now,
 	}
+
+	// 3. Persist via Repository
+	if err := s.repo.Create(ctx, order); err != nil {
+		return nil, fmt.Errorf("service failed to create order: %w", err)
+	}
+
+	// LATER WE WILL PUBLISH A RABBITMQ EVENT HERE
+
+	return order, nil
+}
+
+func (s *orderService) GetOrder(ctx context.Context, id uuid.UUID) (*models.Order, error) {
+	return s.repo.GetByID(ctx, id)
+}
+
+func (s *orderService) ListOrders(ctx context.Context, limit, offset int) ([]*models.Order, error) {
+	return s.repo.List(ctx, limit, offset)
 }
