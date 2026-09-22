@@ -3,10 +3,9 @@ package repository
 import (
 	"context"
 	"fmt"
-	"uuid"
 
 	"github.com/Firuz43/order-service/internal/models"
-	"github.com/jackc/pgx/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -153,9 +152,6 @@ func (r *postgresOrderRepository) GetByID(ctx context.Context, id uuid.UUID) (*m
 		&order.UpdatedAt,
 	)
 
-	if erros.Is(err, pgx.ErrNoRows) {
-		return nil, fmt.Errorf("order with ID %s not found", id)
-	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get order by ID %w", err)
 	}
