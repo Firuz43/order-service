@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/Firuz43/order-service/internal/models"
 	"github.com/Firuz43/order-service/internal/service"
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type OrderHandler struct {
@@ -57,4 +60,38 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusCreated, order)
+}
+
+// GET /orders/{id}
+func (h *OrderHandler) GetOrder(w http.ResponseWriter, r *http.Request) {
+	//Extract URL Parameter
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid UUID format")
+		return
+	}
+
+	order, err := h.svc.GetOrder(r.Context(), id)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Order not found")
+	}
+
+	respondWithJSON(w, http.StatusOK, order)
+}
+
+// GET /orders?
+func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+
+	limit, _ := strconv.Atoi(limitStr)
+	offset, _ := strconv.Atoi(offsetStr)
+
+	orders, err := h.svc.ListOrders(r.Context(), limit, offset)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to list orders")
+		return
+	}
+	respondWithJSON(w, http.StatusOK, orders)
 }
