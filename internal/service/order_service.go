@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/Firuz43/order-service/internal/models"
 	"github.com/Firuz43/order-service/internal/repository"
@@ -28,4 +30,21 @@ type orderService struct {
 // NewOrderService is a constructor for dependency injection
 func NewOrderService(repo repository.OrderRepository) OrderService {
 	return &orderService{repo: repo}
+}
+
+func (s *orderService) CreateOrder(ctx context.Context, req *models.CreateOrderRequest) (*models.Order, error) {
+	// 1. Business Logic Validations
+	if req.CustomerName == "" || req.Item == "" {
+		return nil, fmt.Errorf("%w: customer name and item are required", ErrInvalidInput)
+	}
+	if req.Quantity <= 0 || req.Price <= 0 {
+		return nil, fmt.Errorf("%w: quantity and price must be greater than zero", ErrInvalidInput)
+	}
+
+	// 2. Domain Entity Construction
+	now := time.Now().UTC()
+	order := &models.Order{
+		ID:           uuid.New(),
+		CustomerName: req.CustomerName,
+	}
 }
