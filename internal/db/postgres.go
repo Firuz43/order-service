@@ -22,7 +22,7 @@ func ConnectPostgres(cfg *config.Config) (*pgxpool.Pool, error) {
 		cfg.DBSSLMode,
 	)
 
-	//Parse configuration string into pgxpool.Config
+	//Parse configuration string into pgxpool.Configss
 	poolConfig, err := pgxpool.ParseConfig(dsn)
 
 	if err != nil {
