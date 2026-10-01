@@ -8,7 +8,7 @@ import (
 )
 
 type OrderRepository interface {
-	// CreateOrder creates a new order in the database
+	// CreateOrder creates a new order in the databaseee
 	Create(ctx context.Context, order *models.Order) error
 	GetByID(ctx context.Context, id uuid.UUID) (*models.Order, error)
 	List(ctx context.Context, limit, offset int) ([]*models.Order, error)
