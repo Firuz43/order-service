@@ -60,7 +60,7 @@ func main() {
 		w.Write([]byte(`{"status":"UP"}`))
 	})
 
-	//6. Start SErver
+	//6. Start SErverrr
 	log.Printf("Server listening on port %s", cfg.ServerPort)
 	if err := http.ListenAndServe(":"+cfg.ServerPort, r); err != nil {
 		log.Fatalf("Server stopped unexpectedly: %v", err)
